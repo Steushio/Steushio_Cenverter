@@ -8,11 +8,15 @@ import customtkinter as ctk
 from tkinter import filedialog
 from tkinterdnd2 import TkinterDnD, DND_FILES
 
-def get_ffmpeg_path():
+def get_resource_path(relative_path):
     if getattr(sys, 'frozen', False):
-        return os.path.join(sys._MEIPASS, "ffmpeg.exe")
+        return os.path.join(sys._MEIPASS, relative_path)
     else:
-        return os.path.join(os.path.dirname(os.path.abspath(__file__)), "ffmpeg", "bin", "ffmpeg.exe")
+        return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
+
+# Add local ffmpeg bin to PATH so the app doesn't require a system-wide install
+ffmpeg_path = os.path.join(get_resource_path("ffmpeg"), "bin")
+os.environ["PATH"] = ffmpeg_path + os.pathsep + os.environ.get("PATH", "")
 
 class TkDnDCTk(ctk.CTk, TkinterDnD.DnDWrapper):
     def __init__(self, *args, **kwargs):
@@ -27,6 +31,10 @@ class FFmpegStudio(TkDnDCTk):
         super().__init__()
         self.title("FFmpeg Studio")
         self.geometry("900x750")
+        
+        icon_path = get_resource_path("icon.ico")
+        if os.path.exists(icon_path):
+            self.iconbitmap(icon_path)
         self.queue = []
         self.current_process = None
         self.is_converting = False
@@ -150,7 +158,10 @@ class FFmpegStudio(TkDnDCTk):
     def build_command(self, input_file):
         mode = self.mode_var.get()
         base, ext = os.path.splitext(input_file)
-        cmd = [get_ffmpeg_path(), "-y", "-i", input_file]
+        
+        # Use python explicitly if we're dealing with ffmpeg binary path
+        ffmpeg_exe = os.path.join(get_resource_path("ffmpeg"), "bin", "ffmpeg.exe") if not getattr(sys, 'frozen', False) else get_resource_path("ffmpeg.exe")
+        cmd = [ffmpeg_exe, "-y", "-i", input_file]
 
         # Toggles
         if self.fix_ts_var.get() or mode in ["Fix for Editing", "OBS Fix"]:
@@ -268,7 +279,8 @@ class FFmpegStudio(TkDnDCTk):
         threading.Thread(target=self.run_queue, daemon=True).start()
 
 if __name__ == "__main__":
-    if not os.path.exists(get_ffmpeg_path()):
-        print(f"Error: FFmpeg not found at {get_ffmpeg_path()}")
+    ffmpeg_exec = os.path.join(get_resource_path("ffmpeg"), "bin", "ffmpeg.exe") if not getattr(sys, 'frozen', False) else get_resource_path("ffmpeg.exe")
+    if not os.path.exists(ffmpeg_exec):
+        print(f"Error: FFmpeg not found at {ffmpeg_exec}")
     app = FFmpegStudio()
     app.mainloop()
