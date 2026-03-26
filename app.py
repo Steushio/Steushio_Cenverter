@@ -29,7 +29,7 @@ ctk.set_default_color_theme("blue")
 class FFmpegStudio(TkDnDCTk):
     def __init__(self):
         super().__init__()
-        self.title("FFmpeg Studio")
+        self.title("Sconvert")
         self.geometry("900x750")
         
         icon_path = get_resource_path("icon.ico")

@@ -1,4 +1,4 @@
-# Steushio Cenverter (FFmpeg Studio)
+# Sconvert
 
 A fully standalone, native desktop application for high-performance FFmpeg video and audio conversion. 
 Built with Python and CustomTkinter, it features a beautiful dark-mode interface, drag-and-drop batch processing, and live conversion tracking.
